@@ -357,6 +357,8 @@ Options:
 
 
 
+## command
+
 | command                                              | description                                            | example                                                      |
 | ---------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------ |
 | docker run [参数] images                             | 启动镜像, 新建容器                                     |                                                              |
@@ -381,8 +383,8 @@ Options:
 | docker images                                        | 查看本机的 所有 镜像                                   |                                                              |
 | docker rm 容器id[或者 names]                         | 删除容器                                               |                                                              |
 | docker rmi 镜像名(或者id)                            | 删除镜像                                               |                                                              |
-| docker inspect --format '{{.LogPath}}' 容器id        | 查询 容器的日志                                        |                                                              |
-|                                                      |                                                        |                                                              |
+| docker inspect --format '{{.LogPath}}' 容器id        | 获取指定容器的日志路径                                 |                                                              |
+| docker logs --since 30m 容器名                       | 查看容器日志                                           |                                                              |
 |                                                      |                                                        |                                                              |
 |                                                      |                                                        |                                                              |
 |                                                      |                                                        |                                                              |
@@ -411,6 +413,8 @@ Options:
 |                                                      |                                                        |                                                              |
 
 
+
+`docker inspect` 命令是用来显示 Docker 对象的详细信息，包括容器、网络、卷等对象。`--format` 参数用来指定输出格式。在这里，我们指定输出容器的日志路径。`{{.LogPath}}` 是模板变量，用来表示容器的日志路径。该命令会输出给定容器 ID 的日志路径。
 
 
 
@@ -523,7 +527,33 @@ dockerfile 常用命令
 | VOLUME     | 目录映射,通常翻译为**数据卷**，用于保存持久化数据。          |
 | ONBUILD    | 构建时自动执行的命令                                         |
 
- 
+ ```
+在Dockerfile中，常见的关键字包括：
+
+FROM：指定基础镜像。
+
+RUN：在容器内执行特定的命令行指令。
+
+COPY / ADD：将文件从主机复制到容器内。
+
+WORKDIR：容器启动后的工作目录。 如果在 Dockerfile 中使用了 WORKDIR /wg，表示容器启动后的工作目录就是 /wg，此时如果执行 pwd 命令，命令行工具会打印出 /wg
+
+ENV：设置环境变量。
+
+ARG：声明构建参数。
+
+EXPOSE：声明容器监听的网络端口号。
+
+CMD：容器启动时执行的命令。如果用户指定了其他命令，则会覆盖这个CMD。
+
+ENTRYPOINT：容器启动时默认执行的命令。如果用户指定了其他命令，则会以ENTRYPOINT命令为前缀。
+
+VOLUME：声明一个挂载点，用于持久化存储数据。
+
+其中，FROM、RUN、COPY / ADD等是编写Dockerfile必备且最常使用的关键字，它们使得在Docker容器中部署应用程序变得简单、可重复和高效。同时，Dockerfile还可以通过ENV、ARG、EXPOSE等关键字定义各种配置参数，以适应不同的应用场景和开发需求。
+ ```
+
+
 
 
 
@@ -555,7 +585,79 @@ dockerfile 常用命令
 --volume /usr/java-project/test/log:/tmp/java-project/test/log
 ```
 
+## 2. ADD 和 COPY 区别
 
+```
+在 Dockerfile 中，ADD 和 COPY 命令都用于将文件或目录添加到 Docker 镜像中。但它们之间有几个主要区别：
+
+ADD 命令允许在添加本地 tar 文件的同时进行自动解压缩。而 COPY 命令则不会解压。
+
+ADD 命令还允许从远程 URL 下载资源并将其添加到镜像中，但这可能会导致安全风险。COPY 命令不支持从远程 URL 复制资源。
+
+在构建过程中，如果您使用的是 COPY 命令复制的源文件或目录，则 Docker 构建缓存可以有效地利用这些文件的缓存。这意味着更改这些文件时，只有该指令及其后面的指令将重新构建。而对于 ADD 命令，即使源文件没有更改，也会禁用缓存，因为每次都需要检查源文件中是否存在新文件。这可能会导致构建速度变慢。
+
+最后，ADD 命令还可以在添加文件或目录时自动处理 tar 文件 / URL 的 Content-Type，并在需要时执行相应的解压缩操作。但 COPY 指令不会执行此类操作并且比 ADD 更加直观和可控。
+
+总的来说，如果您只是简单地复制本地文件，则最好使用 COPY 命令。但是，如果您需要将远程 URL 中的文件添加到镜像中或自动解压缩 tar 文件，则应考虑使用 ADD 命令。
+```
+
+## 3. CMD 
+
+如果您有多条命令需要执行，可以考虑使用 shell 脚本或者 entrypoint 命令来实现。这里介绍两种方式：
+
+```
+
+使用 shell 脚本
+在 Dockerfile 中，首先将需要执行的命令写入一个 shell 脚本中，例如 run.sh：
+
+#!/bin/bash
+echo "Hello"
+echo "World"
+exec "$@"
+其中 echo "Hello" 和 echo "World" 是两条要执行的命令，exec "$@" 则是执行容器启动后的指令。然后，在 Dockerfile 最后指定 CMD 命令来运行这个脚本：
+
+CMD ["./run.sh"]
+在构建并运行镜像时，Docker 将会执行 run.sh 脚本，并依次执行 shell 脚本中的每一条命令。
+
+使用 entrypoint 命令
+如果您需要在运行容器时传递参数，可以使用 entrypoint 命令。Dockerfile 类似于上述方法，创建一个 bash 文件并添加权限:
+
+#!/bin/bash
+echo "Hello"
+echo "World"
+exec "$@"
+设置 ENTRYPOINT 为该文件:
+
+ENTRYPOINT ["/path/to/script.sh"]
+在运行容器时，可以通过添加命令行参数来覆盖 ENTRYPOINT 的默认值：
+
+docker run my-image -c whatev#er/command/you/prefer
+使用 ENTRYPOINT 允许您更好地控制命令行参数，并以声明性的方式指定默认命令。
+```
+
+
+
+"CMD tail -f /dev/null"   含义:
+
+```
+CMD tail -f /dev/null
+这个命令在 Dockerfile 中被称为“容器启动命令”。它告诉 Docker 在容器启动时要运行的命令，类似于在主机上开启一个终端窗口然后输入的命令。
+
+在这个命令中，tail 是 Linux 系统中一种常用的文本查看工具， -f 参数表示在文件结尾处等待新数据，并将其输出到标准输出（即终端）。/dev/null 是一个特殊文件，可以视作无限长的黑洞，它会吞噬所有被送入的数据，并且不保存任何东西。因此，运行这个命令相当于让容器从 /dev/null 中读取数据并输出，但实际上并没有任何输出。
+
+通过运行这个命令使得容器能够持续地运行，避免容器因为没有可执行命令而停止运行。
+```
+
+
+
+## 4. RUN
+
+```
+在 Dockerfile 中使用 RUN 指令执行 shell 命令时，每个命令都会在新的临时容器中执行，因此环境变量也只存在于该临时容器中。当后续指令开始在其基础上构建新镜像时，之前在 RUN 中定义的变量将不再存在。
+
+RUN export FULL_APP_NAME="$APP_NAME-$APP_VERSION-pom.xml"
+由于 export FULL_APP_NAME 语句是在一个新临时容器中执行的，其生命周期限定在运行期间，而在新的容器开始时，该环境变量就到达了生命末期，并未真正地保存在Docker中。这可能是为什么这段代码在您试图使用它并没有生效的原因。
+```
 
 
 
@@ -578,3 +680,248 @@ dockerfile 常用命令
 
 
 # 5. dockerfile-compose
+
+
+
+
+
+# 6. docker-mysql8
+
+#安装MySQL8  
+
+```
+docker pull mysql:8.0.16
+```
+
+
+
+#创建数据存储目录
+
+```
+mkdir -p /home/mysql/mysql8/conf
+mkdir -p /home/mysql/mysql8/data
+mkdir -p /home/mysql/mysql8/mysql-files
+```
+
+
+
+#启动
+
+```
+docker run -p 3306:3306 --name=mysql8 \
+-v /home/mysql/mysql8/conf:/etc/mysql/ \
+-v /home/mysql/mysql8/data:/var/lib/mysql \
+-v /home/mysql/mysql8/mysql-files:/var/lib/mysql-files \
+-e MYSQL_ROOT_PASSWORD=root \
+-d mysql:8.0.16 \
+--privileged=true --restart=unless-stopped mysql:8.0.16 --lower-case-table-names=2
+```
+
+
+
+```
+这段代码是基于 Docker 容器运行 MySQL 8.0.16 的命令行参数。
+
+-p 3306:3306: 将主机端口 3306 映射到容器中的 3306 端口，使得通过主机和这个端口访问 MySQL 可以映射到容器内部的 MySQL 服务。
+
+--name=mysql: 指定创建 Docker 容器的名称为 mysql。
+
+-v /home/mysql/mysql8/conf:/etc/mysql/：将本机的 /home/mysql/mysql8/conf 目录挂载到容器中 /etc/mysql 目录下，这样可以在本机上对 MySQL 进行配置。
+
+-v /home/mysql/mysql8/data:/var/lib/mysql: 将本机的 /home/mysql/mysql8/data 目录挂载到容器中 /var/lib/mysql 目录下，这样 MySQL 数据库文件可以在本地持久化保存，并且不会随着容器被删除而消失。
+
+-v /home/mysql/mysql8/mysql-files:/var/lib/mysql-files: 将本机的 /home/mysql/mysql8/mysql-files 目录挂载到容器中 /var/lib/mysql-files 目录下，此目录是专门用于存放 MySQL 中的外部数据文件（例如 CSV 、JSON 文件）和其它导入和导出操作的文件。
+
+-e MYSQL_ROOT_PASSWORD=root: 使用环境变量指定 MySQL 的 root 用户密码为 root，这也是使用该 MySQL 数据库时必须要记住的密码。
+
+-d: 在后台以守护进程的方式运行 MySQL 容器。
+
+--privileged=true：启用特权模式，让容器内部具有与主机操作系统相当的系统权限
+
+--restart=unless-stopped：表示除非手动停止或删除容器，否则在 Docker 引擎被重启或宿主机操作系统重新启动后，Docker 会自动重启该容器
+
+mysql:8.0.16: 指定在 Docker Hub 上下载并使用 MySQL 8.0.16 镜像来创建一个新的容器。
+
+--lower-case-table-names=2：强制 MySQL 按照指定方式处理表名，这里设置为强制将所有表名转换为小写。
+```
+
+
+
+
+
+# 7. docker-redis:bullseye
+
+```
+docker pull redis:bullseye
+```
+
+```shell
+mkdir -p /home/redis/redis-bullseye/conf
+mkdir -p /home/redis/redis-bullseye/data
+
+touch /home/redis/redis-bullseye/conf/redis.conf
+```
+
+```shell
+docker run --restart=always \
+--log-opt max-size=100m \
+-p 6379:6379 \
+--name redis-bullseye \
+-v /home/redis/redis-bullseye/conf/redis.conf:/etc/redis/redis.conf \
+-v /home/redis/redis-bullseye/data:/data \
+-d redis:bullseye \
+redis-server /etc/redis/redis.conf  \
+--appendonly yes  \
+--requirepass redisbullseye
+```
+
+命令解析: 
+
+```
+这是用 Docker 运行 Redis 服务的命令，下面对该命令进行详细解析：
+
+docker run 是 Docker 命令之一，用于创建并启动一个新的容器。
+--restart=always 意味着无论在任何情况下该容器都应该被重启。如果您希望避免这种行为，则可以将值设置为“never”，或者使用其他启动策略。
+--log-opt max-size=100m 表示日志文件大小限制为 100MB。当超过此限制时，Docker 将自动滚动日志。
+-p 6379:6379 将主机的端口 6379 映射到容器的端口 6379，以便外部应用程序可以访问 redis-bullseye 容器中运行的 Redis 服务。
+--name redis-bullseye 为将要创建的容器指定一个名称为 redis-bullseye。
+-v /home/redis/redis-bullseye/conf/redis.conf:/etc/redis/redis.conf 将本地主机上 /home/redis/redis-bullseye/conf/redis.conf 文件映射到容器内的 /etc/redis/redis.conf 文件。这样就可以覆盖默认的 Redis 配置文件，并保留 Redis 实例的持久化存储。
+-v /home/redis/redis-bullseye/data:/data 将本地主机上 /home/redis/redis-bullseye/data 目录映射到容器内的 /data 目录。这将用于持久化存储 Redis 所有数据。
+-d redis:bullseye 指定了要使用的 Docker 镜像名称及其标签，以启动 Docker 容器方式运行 Redis 服务。
+redis-server /etc/redis/redis.conf --appendonly yes --requirepass redisbullseye 是要在容器中运行的命令，它将通过将修改后的 Redis 配置文件传递给 redis-server 来启动 Redis 服务。并设置开启AOF日志功能增加数据落地安全性，同时使用名为"redisbullseye"的口令进行身份验证。
+因此，运行该命令将创建名为 redis-bullseye 的 Docker 容器，并用 Redis 镜像 redis:bullseye 运行 Redis 服务，将容器内部和主机 6379 端口绑定，同时指定了自定义配置文件和持久化目录，并打开 AOF 日志落地功能并且使用 "redisbullseye" 口令作为访问 Redis 的密码。
+```
+
+
+
+
+
+redis.conf 重要配置
+
+```
+protected-mode no : 关闭保护模式，在非本地环境下仍然允许连接 Redis 服务。
+bind <ip_address>: 设置 Redis 监听的网络地址，默认值为 127.0.0.1；
+port <port_number>：设置 Redis 监听的网络端口，默认值为 6379；
+save <seconds> <changes>：设置 Redis 在多少秒后持久化当前数据集，以及当至少有多少个写操作时执行持久化操作；
+appendonly yes：设置是否开启 Redis AOF 持久化，默认为关闭；
+requirepass <password>：设置 Redis 访问密码，为空表示不需要密码保护；
+maxmemory <bytes>：设置 Redis 数据库最大内存限制；
+daemonize yes：将 Redis 以守护进程方式运行。
+```
+
+
+
+
+
+# 8. docker-test:0.0.1
+
+1. Dockerfile
+
+```dockerfile
+FROM openjdk:11
+LABEL maintainer=wg
+
+WORKDIR /opt
+
+COPY ./test-0.0.1-SNAPSHOT.jar /opt
+# COPY /usr/local/keystore/https-wg.keystore /opt
+
+ENTRYPOINT ["nohup", "java","-jar","./test-0.0.1-SNAPSHOT.jar", "> test-001.log","2>&1 &"]
+```
+
+2. 创建镜像
+
+   ```shell
+   docker build -t test:0.0.1 .
+   ```
+
+   
+
+3. 启动容器
+
+   ```shell
+   docker run --name=test-001 \
+   -p 33335:33335 \
+   -d test:0.0.1
+   ```
+
+   
+
+4. 删除容器
+
+   ```shell
+   docker rm 容器id
+   ```
+
+5. 删除镜像
+
+   ```shell
+   docker rmi 镜像id
+   ```
+
+   
+
+6. 进入一个运行中的容器
+
+   ```sh
+   docker exec -it 030157fb3849 /bin/bash
+   ```
+
+7. 退出容器
+
+   ```shell
+   exit
+   ```
+
+   
+
+
+
+
+
+# 9. 项目demo
+
+1. oo-ci-kfsc-register
+
+   ```
+   docker build -t oo-ci-kfsc-register:4.6.0 .
+   ```
+
+   ```
+   docker run --name=register-4.6 -d -p 8848:8848 -p 9848:9848 -p 9849:9849  -v /etc/hosts:/etc/hosts 镜像名
+   ```
+
+2. oo-ci-kfsc-gateway
+
+   ```
+   docker build -t oo-ci-kfsc-gateway:4.6.0 .
+   ```
+
+   ```
+   docker run -d -p 9999:9999 -v /etc/hosts:/etc/hosts --name gateway-4.6 -v /etc/hosts:/etc/hosts 镜像名
+   ```
+
+3. oo-ci-kfsc-admin-biz
+
+   ```
+   docker build --no-cache -t oo-ci-kfsc-admin-biz:4.6 .
+   ```
+
+   ```
+   docker run --name=admin-biz-4.6 -d -p 4000:4000 -v /etc/hosts:/etc/hosts 镜像名
+   ```
+
+4. oo-ci-kfsc-auth
+
+   ```
+   docker build --no-cache -t oo-ci-kfsc-auth:4.6 .
+   ```
+
+   ```
+   docker run --name=auth-4.6 -d -p 3000:3000 -v /etc/hosts:/etc/hosts 镜像名
+   ```
+
+   
+
+   
+
