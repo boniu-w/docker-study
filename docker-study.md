@@ -152,7 +152,7 @@ Options:
 
 
 
-docker run --help : 
+## 2. docker run --help : 
 
 ```shell
 PS C:\Users\wg> docker run --help
@@ -325,8 +325,8 @@ Options:
 
 
 ```shell
--d 后台运行
--p 端口映射
+-d 后台运行 detached mode : 分离模式
+-p 端口映射 --publish
 -v 数据卷挂载
 -e 环境配置
 --name 别名
@@ -337,10 +337,10 @@ Options:
 
 
 - **-a stdin:** 指定标准输入输出内容类型，可选 STDIN/STDOUT/STDERR 三项；
-- **-d:** 后台运行容器，并返回容器ID；
+- **-d:** 后台运行容器，并返回容器ID；detached mode : 分离模式
 - **-i:** 以交互模式运行容器，通常与 -t 同时使用；
-- **-P:** (大写的P)随机端口映射，容器内部端口**随机**映射到主机的端口
-- **-p:** 指定端口映射，格式为：**主机(宿主)端口:容器端口**
+- **-P:** (大写的P)随机端口映射，容器内部端口**随机**映射到主机的端口  
+- **-p:** 指定端口映射，格式为：**主机(宿主)端口:容器端口**  --publish
 - **-t:** 为容器重新分配一个伪输入终端，通常与 -i 同时使用；
 - **--name="nginx-lb":** 为容器指定一个名称；
 - **--dns 8.8.8.8:** 指定容器使用的DNS服务器，默认和宿主一致；
@@ -359,58 +359,57 @@ Options:
 
 ## command
 
-| command                                              | description                                            | example                                                      |
-| ---------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------ |
-| docker run [参数] images                             | 启动镜像, 新建容器                                     |                                                              |
-| docker run -it centos /bin/bash                      | 新建容器并进入容器                                     |                                                              |
-| docker ps                                            | 查询当前正在运行的容器                                 |                                                              |
-| docker ps -a                                         | 查询所有容器                                           |                                                              |
-| exit                                                 | 退出容器, 容器停止                                     |                                                              |
-| ctrl + P + q                                         | 退出容器,但容器不停止                                  |                                                              |
-| docker start 容器id<br />docker container start 容器 |                                                        |                                                              |
-| docker stop 容器id                                   |                                                        |                                                              |
-| docker restart 容器id                                |                                                        |                                                              |
-| docker kill 容器id                                   | 强制停止容器                                           |                                                              |
-| docker run -d --name 容器 /bin/bash                  | 后台启动                                               | 没有任务时, 会自动结束<br />docker run -d centos /bin/bash -c 'while true; do echo 999 ; sleep 2; done; ' |
-| docker run -d --name 别名                            | 启动容器                                               | docker run -d --name nginx01 -p 3344:80 nginx:1.21.4         |
-| docker inspect --help                                | 容器详情                                               |                                                              |
-| docker exec -it 容器id /bin/bash                     | 容器启动后, 容器后台运行后, 进入容器, 开启一个新的终端 |                                                              |
-| docker logs -tf --tail 10 容器id                     | 查看容器日志                                           |                                                              |
-| docker attach 容器id                                 | 进入容器后, 不会启动新的进程                           |                                                              |
-| docker cp 容器id:文件绝对路径  本地文件夹路径        | 拷贝容器里的文件到本地                                 | docker cp 722c5e605ecd:/home/test.java /home                 |
-| docker pull 容器:版本号                              | 从dockerhub 上拉取                                     | docker pull nginx:1.21.4                                     |
-| docker search hello-world                            | 在 docker hub 上 搜索 hello-world 镜像                 |                                                              |
-| docker images                                        | 查看本机的 所有 镜像                                   |                                                              |
-| docker rm 容器id[或者 names]                         | 删除容器                                               |                                                              |
-| docker rmi 镜像名(或者id)                            | 删除镜像                                               |                                                              |
-| docker inspect --format '{{.LogPath}}' 容器id        | 获取指定容器的日志路径                                 |                                                              |
-| docker logs --since 30m 容器名                       | 查看容器日志                                           |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
-|                                                      |                                                        |                                                              |
+| command                                                      | description                                                  | example                                                      |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| docker run [参数] images                                     | 启动镜像, 新建容器                                           |                                                              |
+| docker run -it centos /bin/bash                              | 新建容器并进入容器                                           |                                                              |
+| docker ps                                                    | 查询当前正在运行的容器                                       |                                                              |
+| docker ps -a                                                 | 查询所有容器                                                 |                                                              |
+| exit                                                         | 退出容器, 容器停止                                           |                                                              |
+| ctrl + P + q                                                 | 退出容器,但容器不停止                                        |                                                              |
+| docker start 容器id<br />docker container start 容器         |                                                              |                                                              |
+| docker stop 容器id                                           |                                                              |                                                              |
+| docker restart 容器id                                        |                                                              |                                                              |
+| docker kill 容器id                                           | 强制停止容器                                                 |                                                              |
+| docker run -d --name 容器 /bin/bash                          | 后台启动                                                     | 没有任务时, 会自动结束<br />docker run -d centos /bin/bash -c 'while true; do echo 999 ; sleep 2; done; ' |
+| docker run -d --name 别名                                    | 启动容器                                                     | docker run -d --name nginx01 -p 3344:80 nginx:1.21.4         |
+| docker inspect --help                                        | 容器详情                                                     |                                                              |
+| docker exec -it 容器id /bin/bash                             | 容器启动后, 容器后台运行后, 进入容器, 开启一个新的终端       |                                                              |
+| docker logs -tf --tail 10 容器id                             | 查看容器日志                                                 |                                                              |
+| docker attach 容器id                                         | 进入容器后, 不会启动新的进程                                 |                                                              |
+| docker cp 容器id:文件绝对路径  本地文件夹路径                | 拷贝容器里的文件到本地                                       | docker cp 722c5e605ecd:/home/test.java /home                 |
+| docker pull 容器:版本号                                      | 从dockerhub 上拉取                                           | docker pull nginx:1.21.4                                     |
+| docker search hello-world                                    | 在 docker hub 上 搜索 hello-world 镜像                       |                                                              |
+| docker images                                                | 查看本机的 所有 镜像                                         |                                                              |
+| docker rm 容器id[或者 names]                                 | 删除容器                                                     |                                                              |
+| docker rmi 镜像名(或者id)                                    | 删除镜像                                                     |                                                              |
+| docker inspect --format '{{.LogPath}}' 容器id                | 获取指定容器的日志路径                                       |                                                              |
+| docker logs --since 30m 容器名                               | 查看容器日志                                                 |                                                              |
+| docker volume ls                                             | 查询 docker 卷                                               |                                                              |
+| docker volume rm 卷                                          | 删除 docker 卷                                               |                                                              |
+| docker container update --restart=always  容器名             | 更改容器启动选项                                             |                                                              |
+| docker rmi -f $(docker images -a &#124; grep "<none>" &#124; awk '{print $3}') | 删除 Docker 中的虚悬镜像，也就是那些缺少标记和仓库名称的无用镜像。这些标记为 `<none>` 的镜像通常是由于构建过程中出现错误导致的未命名临时镜像 |                                                              |
+| docker system prune -a                                       | 删除所有未使用的资源, 谨慎使用                               |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
+|                                                              |                                                              |                                                              |
 
 
 
@@ -466,6 +465,43 @@ Options:
 |                                              |                                                        |                                                      |
 |                                              |                                                        |                                                      |
 |                                              |                                                        |                                                      |
+
+
+
+## 3. docker build --help
+
+```
+Options:
+      --add-host list           Add a custom host-to-IP mapping (host:ip)
+      --build-arg list          Set build-time variables
+      --cache-from strings      Images to consider as cache sources
+      --cgroup-parent string    Optional parent cgroup for the container
+      --compress                Compress the build context using gzip
+      --cpu-period int          Limit the CPU CFS (Completely Fair Scheduler) period
+      --cpu-quota int           Limit the CPU CFS (Completely Fair Scheduler) quota
+  -c, --cpu-shares int          CPU shares (relative weight)
+      --cpuset-cpus string      CPUs in which to allow execution (0-3, 0,1)
+      --cpuset-mems string      MEMs in which to allow execution (0-3, 0,1)
+      --disable-content-trust   Skip image verification (default true)
+  -f, --file string             Name of the Dockerfile (Default is 'PATH/Dockerfile')
+      --force-rm                Always remove intermediate containers
+      --iidfile string          Write the image ID to the file
+      --isolation string        Container isolation technology
+      --label list              Set metadata for an image
+  -m, --memory bytes            Memory limit
+      --memory-swap bytes       Swap limit equal to memory plus swap: '-1' to enable unlimited swap
+      --network string          Set the networking mode for the RUN instructions during build (default "default")
+      --no-cache                Do not use cache when building the image
+      --pull                    Always attempt to pull a newer version of the image
+  -q, --quiet                   Suppress the build output and print image ID on success
+      --rm                      Remove intermediate containers after a successful build (default true)
+      --security-opt strings    Security options
+      --shm-size bytes          Size of /dev/shm
+      --squash                  Squash newly built layers into a single new layer
+  -t, --tag list                Name and optionally a tag in the 'name:tag' format
+      --target string           Set the target build stage to build.
+      --ulimit ulimit           Ulimit options (default [])
+```
 
 
 
@@ -679,9 +715,200 @@ RUN export FULL_APP_NAME="$APP_NAME-$APP_VERSION-pom.xml"
 
 
 
-# 5. dockerfile-compose
+# 5. docker-compose
+
+|                      |                                  |      |
+| -------------------- | -------------------------------- | ---- |
+| docker-compose  down | 停止容器, 并 删除容器            |      |
+| docker-compose up    | 根据 docker-compose.yml文件 启动 |      |
+|                      |                                  |      |
+
+```shell
+docker-compose --help
+
+Options:
+  -f, --file FILE             Specify an alternate compose file
+                              (default: docker-compose.yml)
+  -p, --project-name NAME     Specify an alternate project name
+                              (default: directory name)
+  --verbose                   Show more output
+  --log-level LEVEL           Set log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  --no-ansi                   Do not print ANSI control characters
+  -v, --version               Print version and exit
+  -H, --host HOST             Daemon socket to connect to
+
+  --tls                       Use TLS; implied by --tlsverify
+  --tlscacert CA_PATH         Trust certs signed only by this CA
+  --tlscert CLIENT_CERT_PATH  Path to TLS certificate file
+  --tlskey TLS_KEY_PATH       Path to TLS key file
+  --tlsverify                 Use TLS and verify the remote
+  --skip-hostname-check       Don't check the daemon's hostname against the
+                              name specified in the client certificate
+  --project-directory PATH    Specify an alternate working directory
+                              (default: the path of the Compose file)
+  --compatibility             If set, Compose will attempt to convert keys
+                              in v3 files to their non-Swarm equivalent
+  --env-file PATH             Specify an alternate environment file
+
+Commands:
+  build              Build or rebuild services
+  bundle             Generate a Docker bundle from the Compose file
+  config             Validate and view the Compose file
+  create             Create services
+  down               Stop and remove containers, networks, images, and volumes
+  events             Receive real time events from containers
+  exec               Execute a command in a running container
+  help               Get help on a command
+  images             List images
+  kill               Kill containers
+  logs               View output from containers
+  pause              Pause services
+  port               Print the public port for a port binding
+  ps                 List containers
+  pull               Pull service images
+  push               Push service images
+  restart            Restart services
+  rm                 Remove stopped containers
+  run                Run a one-off command
+  scale              Set number of containers for a service
+  start              Start services
+  stop               Stop services
+  top                Display the running processes
+  unpause            Unpause services
+  up                 Create and start containers
+  version            Show the Docker-Compose version information
+
+```
 
 
+
+## 1. 启动 docker-compose.yml 文件
+
+```
+docker-compose up -d
+```
+
+## 2. 假如 docker-compose.yml 文件中 有 build 参数, 
+
+```shell
+docker-compose up --build
+```
+
+执行 `docker-compose up --build` 命令时，Docker Compose 会检查当前所在的目录下是否已经存在构建镜像所依赖的全部镜像。当依赖的镜像不存在或者其版本与 `docker-compose.yml` 文件中所定义的不一致时，Compose 会重新构建所有服务的镜像（包括缓存、打标签等操作），并通过这些构建出来的镜像来启动服务。
+
+如果已经存在符合要求的本地镜像，则不需要重新构建，Compose 也不会对现有镜像进行任何修改。
+
+综上所述，只有在本地不存在满足要求的镜像时才会重新构建，否则将使用本地已有的镜像。
+
+## 3. 命令分析
+
+```
+docker-compose --project-directory ./config --file ./config/docker-compose.yml --project-name oo-ci-kfsc-ciefim down
+
+这是一个使用 Docker Compose 工具的命令，用于停止并删除指定项目目录下的 Docker 容器和服务。
+
+--project-directory ./config：指定项目的根目录为 ./config
+-f ./config/docker-compose.yml：指定使用 ./config/docker-compose.yml 文件定义 Docker Compose 服务。-f 表示后面接要使用的 YAML 文件路径。
+-p oo-ci-kfsc-ciefim：自定义项目名称为 oo-ci-kfsc-ciefim，默认情况下会使用所在目录名作为项目名。-p 表示要创建的 project 名称，也可以理解为对多个服务的隔离分组。这个名称可以用来在之后的构建、启动等操作中引用此项目实例。
+down：通过此命令停止并删除所有相关联的容器、网络以及为该项目创建的数据卷等资源。
+综上所述，该命令的含义是停止并删除指定配置文件 ./config/docker-compose.yml 中定义的 Docker 容器和服务，并将它们资源释放。其中 -f 指定 YAML 配置文件的路径，-p 指定项目名称，并不是运行容器时需要暴露端口或挂载数据卷的参数。
+```
+
+
+
+## 4. docker-compose help
+
+```shell
+Options:
+  -f, --file FILE             Specify an alternate compose file
+                              (default: docker-compose.yml)
+  -p, --project-name NAME     Specify an alternate project name
+                              (default: directory name)
+  --verbose                   Show more output
+  --log-level LEVEL           Set log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  --no-ansi                   Do not print ANSI control characters
+  -v, --version               Print version and exit
+  -H, --host HOST             Daemon socket to connect to
+
+  --tls                       Use TLS; implied by --tlsverify
+  --tlscacert CA_PATH         Trust certs signed only by this CA
+  --tlscert CLIENT_CERT_PATH  Path to TLS certificate file
+  --tlskey TLS_KEY_PATH       Path to TLS key file
+  --tlsverify                 Use TLS and verify the remote
+  --skip-hostname-check       Don't check the daemon's hostname against the
+                              name specified in the client certificate
+  --project-directory PATH    Specify an alternate working directory
+                              (default: the path of the Compose file)
+  --compatibility             If set, Compose will attempt to convert keys
+                              in v3 files to their non-Swarm equivalent
+  --env-file PATH             Specify an alternate environment file
+
+Commands:
+  build              Build or rebuild services
+  bundle             Generate a Docker bundle from the Compose file
+  config             Validate and view the Compose file
+  create             Create services
+  down               Stop and remove containers, networks, images, and volumes
+  events             Receive real time events from containers
+  exec               Execute a command in a running container
+  help               Get help on a command
+  images             List images
+  kill               Kill containers
+  logs               View output from containers
+  pause              Pause services
+  port               Print the public port for a port binding
+  ps                 List containers
+  pull               Pull service images
+  push               Push service images
+  restart            Restart services
+  rm                 Remove stopped containers
+  run                Run a one-off command
+  scale              Set number of containers for a service
+  start              Start services
+  stop               Stop services
+  top                Display the running processes
+  unpause            Unpause services
+  up                 Create and start containers
+  version            Show the Docker-Compose version information
+
+```
+
+
+
+## 5. docker-compose up --help
+
+```shell
+Options:
+    -d, --detach               Detached mode: Run containers in the background,
+                               print new container names. Incompatible with
+                               --abort-on-container-exit.
+    --no-color                 Produce monochrome output.
+    --quiet-pull               Pull without printing progress information
+    --no-deps                  Don't start linked services.
+    --force-recreate           Recreate containers even if their configuration
+                               and image haven't changed.
+    --always-recreate-deps     Recreate dependent containers.
+                               Incompatible with --no-recreate.
+    --no-recreate              If containers already exist, don't recreate
+                               them. Incompatible with --force-recreate and -V.
+    --no-build                 Don't build an image, even if it's missing.
+    --no-start                 Don't start the services after creating them.
+    --build                    Build images before starting containers.
+    --abort-on-container-exit  Stops all containers if any container was
+                               stopped. Incompatible with -d.
+    -t, --timeout TIMEOUT      Use this timeout in seconds for container
+                               shutdown when attached or when containers are
+                               already running. (default: 10)
+    -V, --renew-anon-volumes   Recreate anonymous volumes instead of retrieving
+                               data from the previous containers.
+    --remove-orphans           Remove containers for services not defined
+                               in the Compose file.
+    --exit-code-from SERVICE   Return the exit code of the selected service
+                               container. Implies --abort-on-container-exit.
+    --scale SERVICE=NUM        Scale SERVICE to NUM instances. Overrides the
+                               `scale` setting in the Compose file if present.
+
+```
 
 
 
@@ -888,7 +1115,7 @@ ENTRYPOINT ["nohup", "java","-jar","./test-0.0.1-SNAPSHOT.jar", "> test-001.log"
    ```
 
    ```
-   docker run --name=register-4.6 -d -p 8848:8848 -p 9848:9848 -p 9849:9849  -v /etc/hosts:/etc/hosts 镜像名
+   docker run --restart=always --name=register-4.6 -d -p 8848:8848 -p 9848:9848 -p 9849:9849  -v /etc/hosts:/etc/hosts 镜像名
    ```
 
 2. oo-ci-kfsc-gateway
@@ -898,7 +1125,11 @@ ENTRYPOINT ["nohup", "java","-jar","./test-0.0.1-SNAPSHOT.jar", "> test-001.log"
    ```
 
    ```
-   docker run -d -p 9999:9999 -v /etc/hosts:/etc/hosts --name gateway-4.6 -v /etc/hosts:/etc/hosts 镜像名
+   docker run -d -p 9999:9999 \
+   -v /etc/hosts:/etc/hosts \
+   --name gateway-4.6 \
+   --restart=always \
+   镜像名
    ```
 
 3. oo-ci-kfsc-admin-biz
@@ -921,7 +1152,118 @@ ENTRYPOINT ["nohup", "java","-jar","./test-0.0.1-SNAPSHOT.jar", "> test-001.log"
    docker run --name=auth-4.6 -d -p 3000:3000 -v /etc/hosts:/etc/hosts 镜像名
    ```
 
-   
+5. gitlab
+
+   ```
+    docker pull gitlab/gitlab-ee
+   ```
+
+   ```
+   docker run --detach \
+     --hostname gitlab.sevenme.com \
+     --publish 443:443 --publish 80:80 --publish 23:22 \
+     --name gitlab \
+     --restart always \
+     --volume $GITLAB_HOME/config:/etc/gitlab \
+     --volume $GITLAB_HOME/logs:/var/log/gitlab \
+     --volume $GITLAB_HOME/data:/var/opt/gitlab \
+     --shm-size 256m \
+     gitlab/gitlab-ee:latest
+   ```
+
+   默认 用户名 : root
+
+   默认密码: 会在24小时后 自动删除, 尽快更改
+
+   ```
+   docker exec -it gitlab /bin/bash
+   cat /etc/gitlab/initial_root_password
+   ```
 
    
+
+   问题:
+
+   1. 无法解析` http://gitlab.sevenme.com` 的问题,
+
+      ```
+      --hostname gitlab.sevenme.com
+      解决办法: 配置 hosts 文件
+      ```
+
+6. ciefim
+
+   ```
+   docker build --no-cache -t oo-ci-kfsc-ciefim:4.6.0
+   ```
+
+   ```
+   docker run --name=ciefim-4.6 -d -p 9970:9970 -v /etc/hosts:/etc/hosts 镜像名
+   ```
+
+   
+
+# 10. portainer
+
+
+
+## 1. 版本对应
+
+| Portainer Version         | Release Date       | Docker Version            | Kubernetes Version           | Architectures                                                |
+| ------------------------- | ------------------ | ------------------------- | ---------------------------- | ------------------------------------------------------------ |
+| Community 2.18.2 (latest) | May 1, 2023        | 20.10.9 20.10.13 20.10.17 | 1.22 1.23 1.24               | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.18.1          | April 18, 2023     | 20.10.9 20.10.13 20.10.17 | 1.22 1.23 1.24               | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.17.1          | February 22, 2023  | 20.10.9 20.10.13 20.10.17 | 1.22 1.23 1.24               | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.17.0          | February 7, 2023   | 20.10.9 20.10.13 20.10.17 | 1.22 1.23 1.24               | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.16.2          | November 21, 2022  | 20.10.9 20.10.13 20.10.17 | 1.21.7 1.22 1.23             | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.16.1          | November 9, 2022   | 20.10.9 20.10.13 20.10.17 | 1.21.7 1.22 1.23             | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.16.0          | October 31, 2022   | 20.10.9 20.10.13 20.10.17 | 1.21.7 1.22 1.23             | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.15.1          | September 16, 2022 | 20.10.9 20.10.12 20.10.13 | 1.21.7 1.22 1.23             | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.15.0          | September 6, 2022  | 20.10.9 20.10.12 20.10.13 | 1.21.7 1.22 1.23             | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.14.2          | July 26, 2022      | 20.10.9 20.10.12 20.10.13 | 1.21.7 1.22 1.23             | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.14.1          | July 12, 2022      | 20.10.9 20.10.12 20.10.13 | 1.21.7 1.22 1.23             | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.14.0          | June 28, 2022      | 20.10.9 20.10.12 20.10.13 | 1.21.7 1.22 1.23             | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.13.1          | May 12, 2022       | 20.10.9 20.10.12 20.10.13 | 1.21.7 1.22 1.23             | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.13.0          | May 9, 2022        | 20.10.9 20.10.12 20.10.13 | 1.21.7 1.22 1.23             | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.11.1          | February 8, 2022   | 20.10.8 20.10.11 20.10.12 | 1.20.13 1.21.7 1.22.4        | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.11.0          | December 9, 2021   | 20.10.6 20.10.8 20.10.11  | 1.19.11 1.20.7 1.21 1.22     | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.9.3           | November 22, 2021  | 20.10.5 20.10.6           | 1.19.11 1.20.7 1.21 1.22     | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.9.2           | October 26, 2021   | 20.10.5 20.10.6           | 1.19 1.20 1.21 1.22          | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.9.1           | October 11, 2021   | 20.10.5 20.10.6           | 1.19 1.20 1.21 1.22          | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.9.0           | September 23, 2021 | 20.10.5 20.10.6           | 1.19 1.20 1.21 1.22          | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.6.3           | August 27, 2021    | 20.10.5 20.10.6           | 1.19 1.20 1.21 1.22          | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.6.2           | August 2, 2021     | 20.10.5 20.10.6           | 1.19 1.20.2 1.21             | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.6.1           | July 12, 2021      | 20.10.5 20.10.6           | 1.19 1.20.2 1.21             | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.6.0           | June 25, 2021      | 20.10.5 20.10.6           | 1.19 1.20.2 1.21             | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.5.1           | May 18, 2021       | 20.10.5 20.10.6           | 1.19 1.20.2 1.21             | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.5.0           | May 18, 2021       | 20.10.5                   | 1.19 1.20.2 1.21             | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.1.x           | February 2, 2021   | 20.10.2                   | 1.20.0                       | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.0.1           | January 7, 2021    | 20.10.0                   | 1.17.13 1.18.9 1.19.3 1.20.0 | [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| Community 2.0             | August 31, 2020    | 19.03.12                  | 1.17.13 1.18.6 1.18.9 1.19.3 | [ARM32](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| 1.24.1                    | July 23, 2020      | 19.03.12                  | N/A                          | [ARM32](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| 1.24.0                    | June 2, 2020       | 19.03.10                  | N/A                          | [ARM32](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+| 1.23.2                    | March 25, 2020     | 19.03.6                   | N/A                          | [ARM32](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), [ARM64](https://portal.portainer.io/knowledge/which-arm-architectures-does-portainer-support), x86_64 |
+
+
+
+## 2. docker portainer
+
+```
+docker pull portainer/portainer-ce:2.9.3
+```
+
+```
+docker volume create portainer_data
+```
+
+```
+docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data 镜像名
+```
+
+
+
+```
+https://192.168.12.65:9443/#!/2/docker/dashboard
+我的acer笔记本电脑 {userName: admin, password: offshore123}
+```
 
