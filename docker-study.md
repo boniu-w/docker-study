@@ -390,7 +390,7 @@ Options:
 | docker container update --restart=always  容器名             | 更改容器启动选项                                             |                                                              |
 | docker rmi -f $(docker images -a &#124; grep "<none>" &#124; awk '{print $3}') | 删除 Docker 中的虚悬镜像，也就是那些缺少标记和仓库名称的无用镜像。这些标记为 `<none>` 的镜像通常是由于构建过程中出现错误导致的未命名临时镜像 |                                                              |
 | docker system prune -a                                       | 删除所有未使用的资源, 谨慎使用                               |                                                              |
-|                                                              |                                                              |                                                              |
+| docker network create 网络名                                 | 创建网络                                                     |                                                              |
 |                                                              |                                                              |                                                              |
 |                                                              |                                                              |                                                              |
 |                                                              |                                                              |                                                              |
@@ -509,7 +509,7 @@ Options:
 
 
 
- ![](H:\docker-study\img\v2-820aee2a33654099d87cdd2b7a1ce741_r.jpg)
+ ![](\docker-study\img\v2-820aee2a33654099d87cdd2b7a1ce741_r.jpg)
 
 
 
@@ -717,11 +717,11 @@ RUN export FULL_APP_NAME="$APP_NAME-$APP_VERSION-pom.xml"
 
 # 5. docker-compose
 
-|                      |                                  |      |
-| -------------------- | -------------------------------- | ---- |
-| docker-compose  down | 停止容器, 并 删除容器            |      |
-| docker-compose up    | 根据 docker-compose.yml文件 启动 |      |
-|                      |                                  |      |
+| 命令                                                         | 解释                                                | 例子                                                     |
+| ------------------------------------------------------------ | --------------------------------------------------- | -------------------------------------------------------- |
+| docker-compose  down                                         | 停止容器, 并 删除容器                               |                                                          |
+| docker-compose up                                            | 根据 docker-compose.yml文件 启动                    |                                                          |
+| docker-compose -p 指定stack名字 -f  指定的dockercompose文件  up --build -d | 指定docker-compose 文件 启动, 注意顺序, -f 在up之前 | docker-compose  -f ./docker-compose-it.yml up --build -d |
 
 ```shell
 docker-compose --help
