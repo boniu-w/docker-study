@@ -391,7 +391,7 @@ Options:
 | docker rmi -f $(docker images -a &#124; grep "<none>" &#124; awk '{print $3}') | 删除 Docker 中的虚悬镜像，也就是那些缺少标记和仓库名称的无用镜像。这些标记为 `<none>` 的镜像通常是由于构建过程中出现错误导致的未命名临时镜像 |                                                              |
 | docker system prune -a                                       | 删除所有未使用的资源, 谨慎使用                               |                                                              |
 | docker network create 网络名                                 | 创建网络                                                     |                                                              |
-|                                                              |                                                              |                                                              |
+| docker image prune -f                                        | 清理悬空镜像                                                 |                                                              |
 |                                                              |                                                              |                                                              |
 |                                                              |                                                              |                                                              |
 |                                                              |                                                              |                                                              |
@@ -716,6 +716,8 @@ RUN export FULL_APP_NAME="$APP_NAME-$APP_VERSION-pom.xml"
 
 
 # 5. docker-compose
+
+## 命令
 
 | 命令                                                         | 解释                                                | 例子                                                     |
 | ------------------------------------------------------------ | --------------------------------------------------- | -------------------------------------------------------- |
@@ -1266,4 +1268,93 @@ docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always -v /va
 https://192.168.12.65:9443/#!/2/docker/dashboard
 我的acer笔记本电脑 {userName: admin, password: offshore123}
 ```
+
+
+
+
+
+# 11. 适配arm架构的镜像
+
+要导出适用于 ARM 架构的 Docker 镜像，可以按照以下步骤进行操作：
+
+### 1. 构建 ARM 架构镜像
+
+首先，确保你已经构建了适用于 ARM 架构的 Docker 镜像。如果你在 x86 系统上工作，可以使用 `docker buildx` 来创建 ARM 镜像。
+
+1. **启用 BuildKit**（如果还没有启用）：
+
+   ```
+   bash
+   
+   
+   复制代码
+   export DOCKER_BUILDKIT=1
+   ```
+
+2. **创建一个新的构建器实例**：
+
+   ```
+   bash
+   
+   
+   复制代码
+   docker buildx create --use
+   ```
+
+3. **构建 ARM 镜像**：
+
+   使用 `--platform` 参数指定目标架构，例如：
+
+   ```
+   bash
+   
+   
+   复制代码
+   docker buildx build --platform linux/arm/v7 -t your_image_name .
+   ```
+
+### 2. 导出镜像
+
+构建完成后，可以使用以下命令导出镜像：
+
+```
+bash
+
+
+复制代码
+docker save -o your_image.tar your_image_name
+```
+
+这将把镜像导出到一个 `.tar` 文件中，适合在其他机器上使用。
+
+### 3. 在 ARM 设备上加载镜像
+
+在目标 ARM 设备上，你可以使用以下命令加载导出的镜像：
+
+```
+bash
+
+
+复制代码
+docker load -i your_image.tar
+```
+
+### 4. 运行镜像
+
+加载完成后，可以使用以下命令运行 ARM 镜像：
+
+```
+bash
+
+
+复制代码
+docker run -d --name my_container_name your_image_name
+```
+
+### 注意事项
+
+- 确保在构建和导出过程中选择的标签和名称是唯一的。
+- 如果需要多个 ARM 架构（例如 ARM64），可以在 `--platform` 参数中指定不同的值。
+
+通过这些步骤，你就可以成功导出适用于 ARM 架构的 Docker 镜像了！如果你有任何问题或需要更详细的信息，请随时问我。
 
