@@ -392,10 +392,10 @@ Options:
 | docker system prune -a                                       | 删除所有未使用的资源, 谨慎使用                               |                                                              |
 | docker network create 网络名                                 | 创建网络                                                     |                                                              |
 | docker image prune -f                                        | 清理悬空镜像                                                 |                                                              |
-|                                                              |                                                              |                                                              |
-|                                                              |                                                              |                                                              |
-|                                                              |                                                              |                                                              |
-|                                                              |                                                              |                                                              |
+| docker inspect <镜像名称或ID> --format='{{.Architecture}}'   | docker 查询 镜像 是arm 还是 x86                              |                                                              |
+| docker build -t <镜像名称>:<标签> -f <Dockerfile路径> <构建上下文路径> | docker build                                                 | docker build -t nacos:2.5.2 -f Dockerfile-nacos .(最后一位是个点) |
+| docker save -o your_image.tar your_image_name                | 导出本地镜像                                                 | docker save -o amazoncorretto:8.tar amazoncorretto:8         |
+| docker save -o <输出文件名.tar> <镜像1>:<标签1> <镜像2>:<标签2> | 导出多个镜像                                                 |                                                              |
 |                                                              |                                                              |                                                              |
 |                                                              |                                                              |                                                              |
 |                                                              |                                                              |                                                              |
@@ -414,6 +414,13 @@ Options:
 
 
 `docker inspect` 命令是用来显示 Docker 对象的详细信息，包括容器、网络、卷等对象。`--format` 参数用来指定输出格式。在这里，我们指定输出容器的日志路径。`{{.LogPath}}` 是模板变量，用来表示容器的日志路径。该命令会输出给定容器 ID 的日志路径。
+
+
+
+```shell
+# 导出的 .tar 文件可能非常大。为了节省磁盘空间和网络传输时间，你可以将导出和压缩步骤合并，直接生成一个 .tar.gz 压缩包。
+docker save <镜像名称>:<标签> | gzip > <输出文件名.tar.gz>
+```
 
 
 

@@ -1,0 +1,101 @@
+version: '3'
+
+# 定义锚点
+x-java-opts: &java_opts_base >-
+  -Duser.timezone=GMT+03
+  -Dspring.profiles.active=pro
+  -Dspring.cloud.nacos.username=nacos
+  -Dspring.cloud.nacos.password=Ci@nacos@2023
+  -Dspring.cloud.nacos.discovery.server-addr=10.140.53.6:8848
+  -Dspring.cloud.nacos.config.server-addr=10.140.53.6:8848
+  -Xms1024m
+  -Xmx2048m
+
+services:
+  ci-dp-sys-auth:
+    image: ci-dp-sys-auth-uga:latest
+    container_name: auth
+    restart: always
+    network_mode: "host"
+    environment:
+      JAVA_OPTS: *java_opts_base
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /home/wg/java-project/uga/ci-dp/auth/logs:/logs/ci-dp-sys-auth
+    ports:
+      - "3001:3001"
+
+  ci-dp-sys-admin:
+    image: ci-dp-sys-admin-uga:latest
+    container_name: admin
+    restart: always
+    network_mode: "host"
+    environment:
+      JAVA_OPTS: *java_opts_base
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /home/wg/java-project/uga/ci-dp/admin/logs:/logs/ci-dp-sys-admin-svc
+    ports:
+      - "4001:4001"
+
+  ci-dp-sys-gateway:
+    image: ci-dp-sys-gateway:latest
+    container_name: gateway
+    restart: always
+    network_mode: "host"
+    environment:
+      JAVA_OPTS: *java_opts_base
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /home/wg/java-project/uga/ci-dp/admin/logs:/logs/ci-dp-sys-admin-svc
+
+  ci-dp-peq-asset-svc:
+    image: ci-dp-peq-asset-svc:latest
+    container_name: asset
+    restart: always
+    network_mode: "host"
+    environment:
+      JAVA_OPTS: *java_opts_base
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /home/wg/java-project/uga/ci-dp/admin/logs:/logs/ci-dp-sys-admin-svc
+
+  ci-dp-peq-monitoring-inspection-svc:
+    image: ci-dp-peq-monitoring-inspection-svc:latest
+    container_name: monitoring
+    restart: always
+    network_mode: "host"
+    environment:
+      JAVA_OPTS: *java_opts_base
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /home/wg/java-project/uga/ci-dp/admin/logs:/logs/ci-dp-sys-admin-svc
+
+  ci-dp-peq-regulation-training-svc:
+    image: ci-dp-peq-regulation-training-svc:latest
+    container_name: regulation
+    restart: always
+    network_mode: "host"
+    environment:
+      JAVA_OPTS: *java_opts_base
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /home/wg/java-project/uga/ci-dp/admin/logs:/logs/ci-dp-sys-admin-svc
+
+  ci-dp-peq-strategy-asset-svc:
+    image: ci-dp-peq-strategy-asset-svc:latest
+    container_name: strategy
+    restart: always
+    network_mode: "host"
+    environment:
+      JAVA_OPTS: *java_opts_base
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /home/wg/java-project/uga/ci-dp/admin/logs:/logs/ci-dp-sys-admin-svc

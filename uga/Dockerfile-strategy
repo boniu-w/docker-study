@@ -1,0 +1,9 @@
+FROM amazoncorretto:8 
+
+MAINTAINER cnooc
+
+ADD ci-dp-peq-strategy-asset-svc.jar /app/
+
+ENTRYPOINT exec java $JAVA_OPTS -jar /app/ci-dp-peq-strategy-asset-svc.jar
+
+EXPOSE 9976

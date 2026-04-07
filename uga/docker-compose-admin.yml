@@ -1,0 +1,26 @@
+version: '3'
+
+
+# 定义锚点
+x-java-opts: &java_opts_base >-
+  -Duser.timezone=GMT+03
+  -Dspring.profiles.active=pro
+  -Dspring.cloud.nacos.username=nacos
+  -Dspring.cloud.nacos.password=Ci@nacos@2023
+  -Dspring.cloud.nacos.discovery.server-addr=10.140.53.6:8848
+  -Dspring.cloud.nacos.config.server-addr=10.140.53.6:8848
+  -Xms1024m
+  -Xmx2048m
+
+services:
+  ci-dp-sys-admin:
+    image: ci-dp-sys-admin-uga:latest
+    container_name: admin
+    restart: always
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /home/wg/java-project/uga/ci-dp/admin/logs:/logs/ci-dp-sys-admin-svc
+    environment:
+      JAVA_OPTS: *java_opts_base
