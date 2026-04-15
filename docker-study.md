@@ -985,6 +985,87 @@ mysql:8.0.16: 指定在 Docker Hub 上下载并使用 MySQL 8.0.16 镜像来创�
 
 
 
+## 20260415例子:
+
+```sh
+mkdir -p conf data logs
+cd  conf
+touch my.conf
+```
+
+
+
+cat conf/my.conf
+
+```properties
+[mysqld]
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+default_authentication_plugin=mysql_native_password
+```
+
+
+
+docker-compose-mysql8045.yml
+
+```yml
+version: '3'
+services:
+  # --- 主库配置 ---
+  mysql-master:
+    image: mysql:8.0.45
+    container_name: mysql-master
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: wanggang  # 请修改为你的强密码
+      MYSQL_DATABASE: wanggang           # 可选：启动时自动创建数据库
+      TZ: Asia/Shanghai                # 设置时区
+    volumes:
+      - ./data:/var/lib/mysql          # 数据持久化
+      - ./logs:/var/log/mysql          # 日志持久化
+      - ./conf:/etc/mysql/conf.d       # 挂载自定义配置
+    command:
+      - --lower_case_table_names=1     # 表名不区分大小写（Windows兼容）
+```
+
+
+
+```sh
+第一步: 用root登录
+docker exec -it mysql-master mysql -u root -pwanggang
+
+第二步: 创建用户
+-- 创建用户 wanggang，密码设为 wanggang
+-- 使用 '%' 允许从任何主机连接，避免 Docker 内部 IP 问题
+CREATE USER 'wanggang'@'%' IDENTIFIED BY 'wanggang';
+
+第三步: 授权
+-- 将 wanggang 数据库的所有权限赋予给 wanggang 用户
+GRANT ALL PRIVILEGES ON wanggang.* TO 'wanggang'@'%';
+
+-- 刷新权限使其立即生效
+FLUSH PRIVILEGES;
+
+第四步: 验证
+docker exec -it mysql-master mysql -u wanggang -p
+```
+
+
+
+开放端口
+
+```sh
+sudo firewall-cmd --zone=public  --list-ports
+sudo firewall-cmd --zone=public --add-port=3306/tcp --permanent
+sudo firewall-cmd --reload
+```
+
+
+
+
+
 # 7. docker-redis:bullseye
 
 ```
@@ -1364,4 +1445,120 @@ docker run -d --name my_container_name your_image_name
 - 如果需要多个 ARM 架构（例如 ARM64），可以在 `--platform` 参数中指定不同的值。
 
 通过这些步骤，你就可以成功导出适用于 ARM 架构的 Docker 镜像了！如果你有任何问题或需要更详细的信息，请随时问我。
+
+
+
+# 12. 关键字
+
+Dockerfile 中的关键字（指令）是构建 Docker 镜像的命令。它们各自承担着不同的职责，从定义基础环境到设置容器启动命令。
+
+以下是 Dockerfile 中常用关键字及其作用的详细介绍：
+
+### 🏗️ 核心构建指令
+
+这些是构建镜像时最常用、最基础的指令。
+
+- **FROM**
+  - **作用**：指定一个基础镜像，是所有后续指令的起点。一个 Dockerfile 必须以 `FROM` 指令开始。
+  - **示例**：`FROM ubuntu:22.04`
+- **RUN**
+  - **作用**：在**构建镜像时**执行命令。常用于安装软件包、创建目录、编译代码等。每一条 `RUN` 指令都会创建一个新的镜像层。
+  - **示例**：`RUN apt-get update && apt-get install -y curl`
+- **COPY**
+  - **作用**：将构建上下文（通常是你的项目目录）中的文件或目录复制到镜像中。这是复制文件的首选指令，因为它行为明确、可预测。
+  - **示例**：`COPY ./src /app/src`
+- **ADD**
+  - **作用**：与 `COPY` 类似，但功能更强大。它除了复制文件，还能自动解压 tar 压缩包，并支持从远程 URL 下载文件。由于功能复杂，通常建议优先使用 `COPY`。
+  - **示例**：`ADD ./app.tar.gz /app/`
+- **WORKDIR**
+  - **作用**：为后续的 `RUN`、`CMD`、`ENTRYPOINT`、`COPY` 和 `ADD` 指令设置工作目录。如果目录不存在，它会自动创建。
+  - **示例**：`WORKDIR /app`
+
+### 🚀 容器运行指令
+
+这些指令定义了容器启动后的行为。
+
+- **CMD**
+  - **作用**：为容器启动时提供**默认**执行的命令。一个 Dockerfile 中只能有一个 `CMD` 指令，并且可以通过 `docker run` 命令后面附加的参数来覆盖它。
+  - **示例**：`CMD ["python", "app.py"]`
+- **ENTRYPOINT**
+  - **作用**：配置容器启动时要执行的**主要**命令。与 `CMD` 不同，`ENTRYPOINT` 指定的命令不会被 `docker run` 的参数轻易覆盖，后者会作为参数传递给 `ENTRYPOINT` 的命令。通常用于将容器制作成一个可执行程序。
+  - **示例**：`ENTRYPOINT ["python", "app.py"]`
+
+### ⚙️ 配置与环境指令
+
+这些指令用于配置镜像的元数据、环境变量和用户权限。
+
+- **ENV**
+  - **作用**：设置环境变量。这些变量在镜像构建期间和容器运行时都可用。
+  - **示例**：`ENV APP_ENV=production`
+- **ARG**
+  - **作用**：定义一个**构建时**变量。它只在 `docker build` 过程中可用，容器运行时无法访问。常用于在构建时传入版本号等参数。
+  - **示例**：`ARG VERSION=1.0`
+- **EXPOSE**
+  - **作用**：**声明**容器在运行时会监听的网络端口。这只是一个元数据说明，并不会真正发布端口。发布端口需要在运行容器时使用 `-p` 或 `-P` 参数。
+  - **示例**：`EXPOSE 8080`
+- **VOLUME**
+  - **作用**：创建一个指定的挂载点，并标记它可以从外部挂载数据卷。这通常用于持久化数据或共享数据。
+  - **示例**：`VOLUME ["/data"]`
+- **USER**
+  - **作用**：指定运行容器进程的用户名或用户ID。默认情况下，容器以 root 用户运行，使用 `USER` 指令可以提高安全性。
+  - **示例**：`USER appuser`
+
+### 🏷️ 元数据与其他指令
+
+- **LABEL**
+  - **作用**：为镜像添加元数据（键值对），例如版本、描述、维护者等信息。
+  - **示例**：`LABEL maintainer="your_email@example.com"`
+- **HEALTHCHECK**
+  - **作用**：定义一个命令，Docker 会用它来检查容器是否仍在正常工作。
+  - **示例**：`HEALTHCHECK CMD curl --fail http://localhost:8080/ || exit 1`
+- **MAINTAINER**
+  - **作用**：用于标注镜像的作者信息。此指令已被官方标记为**弃用**，建议使用 `LABEL` 指令替代。
+  - **示例**：`MAINTAINER "Your Name <your_email@example.com>"`
+- **SHELL**
+  - **作用**：为后续的 `RUN`、`CMD`、`ENTRYPOINT` 等指令指定默认的 Shell。
+  - **示例**：`SHELL ["/bin/bash", "-c"]`
+- **STOPSIGNAL**
+  - **作用**：设置停止容器时发送到容器的系统调用信号。
+  - **示例**：`STOPSIGNAL SIGTERM`
+- **ONBUILD**
+  - **作用**：添加一个触发器指令。当当前镜像被用作其他镜像的基础镜像时，这些触发器指令会被执行。
+  - **示例**：`ONBUILD COPY . /app/src`
+
+
+
+
+
+# 13. 健康检查
+
+正常的话是这样子的 "curl http://localhost:33346/actuator/health"
+
+```json
+{
+  "status": "UP",
+  "components": {
+    "db": {
+      "status": "UP",
+      "details": {
+        "database": "MySQL",
+        "validationQuery": "isValid()"
+      }
+    },
+    "diskSpace": {
+      "status": "UP",
+      "details": {
+        "total": 1000202039296,
+        "free": 681032425472,
+        "threshold": 10485760,
+        "path": "H:\\java-project\\wg\\springboot-3.1.0-java17\\.",
+        "exists": true
+      }
+    },
+    "ping": {
+      "status": "UP"
+    }
+  }
+}
+```
 
