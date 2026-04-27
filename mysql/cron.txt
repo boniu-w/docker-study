@@ -1,0 +1,1 @@
+0 1 * * * root /bin/bash /opt/data/mysql-8.0.45/mysqlbackup.sh
